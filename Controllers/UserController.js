@@ -3,6 +3,68 @@ const User = require("../Models/userModel")
 const userController = {
     getUser: async (req, res) => {
         try {
+            const Users = await User.find();
+
+            res.status(200).json(Users)
+        }
+        catch (error){
+            return res.status(500).json({
+                message: `fetching user failed: ${error.message}`
+            })
+        }
+    },
+    createUser: async (req, res) => {
+        try {
+            const data = req.body;
+
+            if (Array.isArray(data)) {
+                await User.insertMany(data);
+            } else {
+                await User.create(data);
+            }
+
+            res.status(200).json({ data });
+        }
+        catch (error){
+            return res.status(500).json({
+                message: `Creation user failed: ${error.message}`
+            })
+        }
+    },
+    updateUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const { Name, Age } = req.body;
+
+            const updatedUser = await User.findByIdAndUpdate(id, { Name, Age });
+
+            res.status(200).json(updatedUser);
+        }
+        catch (error){
+                return res.status(500).json({
+                message: `Creation user failed: ${error.message}`
+            })
+        }
+    }, 
+    deleteUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            await User.findByIdAndDelete(id);
+            res.status(200).json({Message: "User Deletion Successfull"})
+        }
+        catch (error){
+            return res.json({Message: `Deletion Not completed ${error.message}`})
+        }
+    }
+}
+
+module.exports = userController;
+
+
+ /*    getUser: async (req, res) => {
+        try {
             const users = await User.find();
 
             return res.status(200).json(users);
@@ -62,7 +124,4 @@ const userController = {
                 message: `Deletion User failed: ${error.message}`
             })
         }
-    }
-}
-
-module.exports = userController;
+    } */
