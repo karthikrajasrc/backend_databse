@@ -57,6 +57,18 @@ const userController = {
         catch (error){
             return res.json({Message: `Deletion Not completed ${error.message}`})
         }
+    }, 
+    getUserbyID: async (req, res) => {
+        try {
+        const { id } = req.params;
+
+        const userbyID = await User.findById(id);
+        
+            res.status(200).json( userbyID );
+        } 
+        catch (error){
+            return res.status(500).json({Message: "Could Not find the user!"})
+        }
     }
 }
 
