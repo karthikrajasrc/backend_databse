@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+
 const authController = {
     regiterUser: async (req, res) => {
         try {
@@ -47,7 +48,13 @@ const authController = {
 
             const token = await jwt.sign({ id: logged[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
 
-            return res.status(200).json({ Message: "User Login SuccessFull!!", Token: token });
+            res.cookie("Token", token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "Strict"
+            });
+
+            return res.status(200).json({ Message: "User Login SuccessFull!!", User: logged });
 
         }
         catch(error) {
