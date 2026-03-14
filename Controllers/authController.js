@@ -6,7 +6,7 @@ const authController = {
         try {
             const { Name, Email, Password } = req.body;
 
-            const hasedPassword = await bcrypt.hash(Password, 10);
+            const hashedPassword = await bcrypt.hash(Password, 10);
 
             const AlreadyRegister = await Auth.findOne({ Email });
             console.log(AlreadyRegister);
@@ -16,7 +16,7 @@ const authController = {
             }
 
             const regsiteredUser = new Auth({
-                Name, Email, Password: hasedPassword
+                Name, Email, Password: hashedPassword
             });
 
             const savedUser = await regsiteredUser.save();
@@ -27,8 +27,28 @@ const authController = {
             return res.status(500).json({ Message: "Error found on registration!!" });
         }
     }, 
-     loginUser: async (req, res) => {
-        res.json({ Message: "Login successfll"})
+    loginUser: async (req, res) => {
+        try {
+            const { Email, Password } = req.body;
+
+            const logged = await Auth.find({ Email });
+
+            if (logged.length == 0) {
+                return res.status(500).json({ Message: "User Not found!" });
+            }   
+
+            const isPasswordvalid = await bcrypt.compare(Password, logged[0].Password);
+
+            if (!isPasswordvalid) {
+                 return res.status(400).json({ message: 'password incorrect' });
+            }
+
+            res.status(200).json({ Message: "User Login SuccessFull!!" });
+
+        }
+        catch(error) {
+             return res.status(500).json({ Message: "Error found on Login!!" });
+        }
     }
 }
 
