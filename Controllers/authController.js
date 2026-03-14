@@ -53,21 +53,12 @@ const authController = {
         catch(error) {
              return res.status(500).json({ Message: "Error found on Login!!" });
         }
-    }, me: async (req, res) => {
+    },
+    me: async (req, res) => {
         try {
-            const token = req.headers["authorization"]?.split(" ")[1];
+            const userid = req.userID;
             
-            if (!token) {
-                return res.status(500).json({ Message: "No token found!" });
-            }
-
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-           
-            if (!decoded) {
-                return res.status(500).json({ Message: "Invalid Token" });
-            }
-
-            const user = await Auth.findById(decoded.id);
+            const user = await Auth.findById(userid);
 
             return res.status(200).json({ Message: "User Logged in", user: user });
 
