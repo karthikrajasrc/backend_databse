@@ -1,4 +1,4 @@
-const auth = require("../Models/authModel");
+const Auth = require("../Models/authModel");
 const bcrypt = require("bcrypt");
 
 const authController = {
@@ -8,11 +8,18 @@ const authController = {
 
             const hasedPassword = await bcrypt.hash(Password, 10);
 
-            const regsiteredUser = {
-                Name, Email, Password: hasedPassword
-            };
+            const AlreadyRegister = await Auth.findOne({ Email });
+            console.log(AlreadyRegister);
 
-            const savedUser = await auth.create(regsiteredUser);
+            if (AlreadyRegister) {
+                return res.status(400).json({ message: 'user already exists' })
+            }
+
+            const regsiteredUser = new Auth({
+                Name, Email, Password: hasedPassword
+            });
+
+            const savedUser = await regsiteredUser.save();
 
             res.status(200).json({ Message: "Registration successfull", user: savedUser });
         }
