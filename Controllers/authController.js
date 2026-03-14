@@ -1,5 +1,7 @@
 const Auth = require("../Models/authModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const authController = {
     regiterUser: async (req, res) => {
@@ -43,11 +45,35 @@ const authController = {
                  return res.status(400).json({ message: 'password incorrect' });
             }
 
-            res.status(200).json({ Message: "User Login SuccessFull!!" });
+            const token = await jwt.sign({ id: logged[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
+
+            return res.status(200).json({ Message: "User Login SuccessFull!!", Token: token });
 
         }
         catch(error) {
              return res.status(500).json({ Message: "Error found on Login!!" });
+        }
+    }, me: async (req, res) => {
+        try {
+            const token = req.headers["authorization"]?.split(" ")[1];
+            
+            if (!token) {
+                return res.status(500).json({ Message: "No token found!" });
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+           
+            if (!decoded) {
+                return res.status(500).json({ Message: "Invalid Token" });
+            }
+
+            const user = await Auth.findById(decoded.id);
+
+            return res.status(200).json({ Message: "User Logged in", user: user });
+
+        }
+        catch (error) {
+            return res.status(500).json({ Message: "Error found on Login!!" });
         }
     }
 }
