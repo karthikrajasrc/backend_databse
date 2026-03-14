@@ -9,52 +9,52 @@ const authController = {
         try {
             const { Name, Email, Password } = req.body;
 
-            const hashedPassword = await bcrypt.hash(Password, 10);
+            const alreadyRegister = await Auth.findOne({ Email });
 
-            const AlreadyRegister = await Auth.findOne({ Email });
-            console.log(AlreadyRegister);
-
-            if (AlreadyRegister) {
-                return res.status(400).json({ message: 'user already exists' })
+            if (alreadyRegister) {
+            return res.status(500).json({ Message: "User Already exists" });
             }
 
-            const regsiteredUser = new Auth({
-                Name, Email, Password: hashedPassword
-            });
+            let hasPassword = await bcrypt.hash(Password, 10);
 
-            const savedUser = await regsiteredUser.save();
+            const user = new Auth({
+                Name, Email, Password: hasPassword
+            })
 
-            res.status(200).json({ Message: "Registration successfull", user: savedUser });
+            const registerUser = await user.save();
+            console.log(registerUser);
+
+            return res.status(200).json({ Message: "User Registered SuccessFully", user: registerUser });
         }
         catch (error) {
-            return res.status(500).json({ Message: "Error found on registration!!" });
+            return res.status(500).json({ Message: "Registration Failed!" });
         }
     }, 
     loginUser: async (req, res) => {
         try {
             const { Email, Password } = req.body;
 
-            const logged = await Auth.find({ Email });
-
-            if (logged.length == 0) {
-                return res.status(500).json({ Message: "User Not found!" });
-            }   
-
-            const isPasswordvalid = await bcrypt.compare(Password, logged[0].Password);
-
-            if (!isPasswordvalid) {
-                 return res.status(400).json({ message: 'password incorrect' });
+            const loggeduser = await Auth.find({ Email });
+            if (loggeduser.length == 0) {
+                return res.status(500).json({ Message: "No user Found! Please Register.." });
             }
 
-            const token = await jwt.sign({ id: logged[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
+            const isCorrectpass = await bcrypt.compare(Password, loggeduser[0].Password);
+
+            if (!isCorrectpass) {
+                return res.status(500).json({ Message: "Password Invalid!" });
+            }
+
+            const token = await jwt.sign({ id: loggeduser[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
 
             res.cookie("Token", token, {
                 httpOnly: true,
                 secure: false,
                 sameSite: "Strict"
-            });
+            })
+            
 
-            return res.status(200).json({ Message: "User Login SuccessFull!!", User: logged });
+            return res.status(200).json({ Message: "Login SuccessFull", User: loggeduser });
 
         }
         catch(error) {
