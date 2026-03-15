@@ -12,49 +12,49 @@ const authController = {
             const alreadyRegister = await Auth.findOne({ Email });
 
             if (alreadyRegister) {
-            return res.status(500).json({ Message: "User Already exists" });
+                return res.status(500).json({Message: "User Already Exists!!"})
             }
 
-            let hasPassword = await bcrypt.hash(Password, 10);
+            const hasedPassword = await bcrypt.hash(Password, 10);
 
-            const user = new Auth({
-                Name, Email, Password: hasPassword
+            const newUser = new Auth({
+                Name, Email, Password: hasedPassword
             })
 
-            const registerUser = await user.save();
-            console.log(registerUser);
+            const saveduser = await newUser.save();
 
-            return res.status(200).json({ Message: "User Registered SuccessFully", user: registerUser });
+            return res.status(200).json({ Message: "User Regsitered Succesfully !", User: saveduser });
+
         }
         catch (error) {
-            return res.status(500).json({ Message: "Registration Failed!" });
+            return res.status(500).json({ Message: "Registration Failed!", Error: error.Message });
         }
     }, 
     loginUser: async (req, res) => {
         try {
             const { Email, Password } = req.body;
 
-            const loggeduser = await Auth.find({ Email });
-            if (loggeduser.length == 0) {
-                return res.status(500).json({ Message: "No user Found! Please Register.." });
+            const loggedUser = await Auth.find({ Email });
+
+            if (loggedUser.length == 0) {
+                return res.status(500).json({ Message: "No user Found!! Please register.." });
             }
 
-            const isCorrectpass = await bcrypt.compare(Password, loggeduser[0].Password);
+            const isPasswordvalid = await bcrypt.compare(Password, loggedUser[0].Password);
 
-            if (!isCorrectpass) {
-                return res.status(500).json({ Message: "Password Invalid!" });
+            if (!isPasswordvalid) {
+                return res.status(500).json({ Message: "Password Incorrect" });
             }
 
-            const token = await jwt.sign({ id: loggeduser[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
+            const token = await jwt.sign({ id: loggedUser[0]._id }, process.env.JWT_SECRET, { expiresIn: "3h" });
 
             res.cookie("Token", token, {
                 httpOnly: true,
                 secure: false,
                 sameSite: "Strict"
-            })
-            
+            });
 
-            return res.status(200).json({ Message: "Login SuccessFull", User: loggeduser });
+            return res.status(200).json({ Message: "User logined in Successfully!", User: loggedUser });
 
         }
         catch(error) {

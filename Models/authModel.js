@@ -4,6 +4,8 @@ const authSchema = new mongoose.Schema({
     Name: String,
     Email: String,
     Password: String
-});
+})
 
-module.exports = mongoose.model("Auth", authSchema, "auth");
+module.exports = mongoose.model("Auth", authSchema, "auth");    
+
+

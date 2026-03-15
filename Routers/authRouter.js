@@ -8,3 +8,4 @@ authRouter.post("/login", loginUser)
 authRouter.post("/me", isAuthenticated ,me)
 
 module.exports = authRouter;
+

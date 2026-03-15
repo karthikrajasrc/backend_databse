@@ -4,17 +4,21 @@ const jwt = require("jsonwebtoken");
 const auth = {
     isAuthenticated: async (req, res, next) => {
         try {
-            const token = req.cookies.Token;
-            const validToken = await jwt.verify(token, process.env.JWT_SECRET);
+            const token = req.cookies?.Token;
 
-            if (!validToken) {
-                return res.status(500).json({Message: "Token is Invalid"})
+            if (!token) {
+                return res.status(500).json({Message: "No token provided!"})
             }
 
-            req.userID = validToken.id;
+            const isvalidToken = jwt.verify(token, process.env.JWT_SECRET)
+
+            if (!isvalidToken) {
+                return res.status(500).json({ Message: "The token expired and invalid!" });
+            }
+
+            req.userID = isvalidToken.id;
 
             next();
-
                 }
                 catch (error) {
                     return res.status(500).json({ Message: "Error found on Token!!" });
