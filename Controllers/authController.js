@@ -15,11 +15,19 @@ const authController = {
                 return res.status(500).json({Message: "User Already Exists!!"})
             }
 
+
+
             const hasedPassword = await bcrypt.hash(Password, 10);
 
             const newUser = new Auth({
                 Name, Email, Password: hasedPassword
             })
+
+            const userRole = await Auth.find();
+
+            if (userRole.length == 0) {
+                newUser.Role = "Admin";
+            }
 
             const saveduser = await newUser.save();
 
@@ -72,6 +80,15 @@ const authController = {
         }
         catch (error) {
             return res.status(500).json({ Message: "Error found on Login!!" });
+        }
+    },
+    logoutUser: async (req, res) => {
+        try {
+            res.clearCookie("Token");
+            return res.status(200).json({ Message: "User Logged out Successfully!" });
+        }
+        catch (error) {
+            return res.status(500).json({ Message: "Error found on Logout!!" });
         }
     }
 }

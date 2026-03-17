@@ -23,6 +23,20 @@ const auth = {
                 catch (error) {
                     return res.status(500).json({ Message: "Error found on Token!!" });
                 }
+    }, allowedRoles: (roles) => {
+        return async (req, res, next) => {
+            const userId = req.userID;
+
+            const user = await Auth.findById(userId);
+
+            const role = user.Role;
+
+            if (!role.includes(roles)) {
+                return res.status(401).json({ Message: "Unauthorized Access!!" });
+            }
+
+            next();
+        }
     }
 }
 
